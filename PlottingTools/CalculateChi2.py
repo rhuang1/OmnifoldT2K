@@ -37,6 +37,7 @@ for idx,val in enumerate(data_truth[:,0:2]):
                 break
 
 # Evaluate chi2 for both IBU and Omnifold
+# Shape of IBU result is (Placeholder, Throw number, Iteration number, Bin Result)
 ibuMuon = np.load("%s/IBU_2DMuon_FakeData%d_SystStat.npy" % (resultsDir, fakeIdx))
 ibuChi2 = [[] for i in range(4)]
 omniChi2 = [[] for i in range(4)]
@@ -44,7 +45,11 @@ for it in range(ibuMuon.shape[2]):
     meanUnfold = np.mean(ibuMuon[0,:,it,:], axis=0)
     cov = np.cov(ibuMuon[0,:,it,:].T)
     ibuChi2[0].append(np.dot(meanUnfold - dataTruthBinned, np.dot(np.linalg.pinv(cov), meanUnfold - dataTruthBinned)) / len(analysisBins))
+
+# IBU iteration 0 is the prior
 omniChi2[0].append(ibuChi2[0][0])
+
+# Shape of Omnifold result is (Iteration number, Throw number, Bin Result)
 omniMuon = np.load("%s/Omnifold_2DMuon_FDS%s_SystStat_NNAverage.npy" % (resultsDir, fakeIdx))
 for it in range(omniMuon.shape[0]):
     thisSlice = omniMuon[it,:,:]
