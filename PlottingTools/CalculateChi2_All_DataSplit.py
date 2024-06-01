@@ -52,7 +52,6 @@ for it in range(omniMuon.shape[0]):
     thisSlice = omniMuon[it,:,:]
     meanUnfold = np.mean(thisSlice, axis=0)
     cov = np.cov(thisSlice.T)
-    cov = np.cov(ibuMuon[0,:,6,:].T)
     omniChi2[0].append(np.dot(meanUnfold - dataTruthBinned, np.dot(np.linalg.pinv(cov), meanUnfold - dataTruthBinned)) / len(analysisBins))
 uniChi2[0].append(ibuChi2[0][0])
 #uniMuon = np.load("%s/Omnifold_2DMuon_FDS%s_ReqProton_SystStatDataSplit_NNAverage.npy" % (resultsDir, fakeIdx))
