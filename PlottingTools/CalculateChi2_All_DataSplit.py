@@ -17,9 +17,11 @@ fakeIdx = flags.fds
 plotDir = flags.plotDir
 resultsDir = flags.resultsDir
 
-data_truth = np.load(dataDir+'mc_vals_truth_ReactionCodesIncluded.npy')[0::2]
+data_truth = np.load(dataDir+'mc_vals_truth_ReactionCodesIncluded.npy')[0::2,:]
 data_pass_truth = np.load(dataDir+'mc_pass_truth_Nominal.npy')[0::2]
+#data_truth_weight = np.load(dataDir+'mc_weights_truth_FakeDataStudy%d.npy' % 9)[0::2]
 data_truth_weight = np.load(dataDir+'mc_weights_truth_FakeDataStudy%d.npy' % fakeIdx)[0::2]
+#data_truth_weight = np.load(dataDir+'mc_weights_truth_FakeDataStudy%d.npy' % 2)[0::2]
 
 analysisBins = []
 with open("/global/cfs/projectdirs/m4045/users/rhuang/T2K/onoffaxisdata/analysis_binning.txt", 'r') as f:
@@ -28,7 +30,7 @@ with open("/global/cfs/projectdirs/m4045/users/rhuang/T2K/onoffaxisdata/analysis
         analysisBins.append([float(val) for val in row.split()])
 
 data_mask = data_truth[:,8] < 3
-dataTruthBinned = [0 for val in analysisBins]
+dataTruthBinned = [0. for val in analysisBins]
 for idx,val in enumerate(data_truth[:,0:2]):
     mask = data_mask[idx]
     if mask:
@@ -39,6 +41,7 @@ for idx,val in enumerate(data_truth[:,0:2]):
 
 # Evaluate chi2 for both IBU and Omnifold
 ibuMuon = np.load("%s/IBU_2DMuon_FakeData%d_SystStatDataSplit.npy" % (resultsDir, fakeIdx))
+#ibuMuon = np.load("%s/IBU_2DMuon_FakeData%d_SystStatDataSplit.npy" % (resultsDir, 10))
 ibuChi2 = [[] for i in range(4)]
 omniChi2 = [[] for i in range(4)]
 uniChi2 = [[] for i in range(4)]
@@ -48,14 +51,13 @@ for it in range(ibuMuon.shape[2]):
     ibuChi2[0].append(np.dot(meanUnfold - dataTruthBinned, np.dot(np.linalg.pinv(cov), meanUnfold - dataTruthBinned)) / len(analysisBins))
 omniChi2[0].append(ibuChi2[0][0])
 omniMuon = np.load("%s/Omnifold_2DMuon_FDS%s_SystStatDataSplit_NNAverage.npy" % (resultsDir, fakeIdx))
+#omniMuon = np.mean(np.load("%s/Omnifold_2DMuon_FDS%s_SystStatDataSplit_SeparateTrials.npy" % (resultsDir, fakeIdx))[:,:,0:8,:], axis=2)
 for it in range(omniMuon.shape[0]):
     thisSlice = omniMuon[it,:,:]
     meanUnfold = np.mean(thisSlice, axis=0)
     cov = np.cov(thisSlice.T)
-    cov = np.cov(ibuMuon[0,:,6,:].T)
     omniChi2[0].append(np.dot(meanUnfold - dataTruthBinned, np.dot(np.linalg.pinv(cov), meanUnfold - dataTruthBinned)) / len(analysisBins))
 uniChi2[0].append(ibuChi2[0][0])
-#uniMuon = np.load("%s/Omnifold_2DMuon_FDS%s_ReqProton_SystStatDataSplit_NNAverage.npy" % (resultsDir, fakeIdx))
 uniMuon = np.load("%s/Omnifold_2DMuon_FDS%s_Multifold_SystStatDataSplit_NNAverage.npy" % (resultsDir, fakeIdx))
 for it in range(uniMuon.shape[0]):
     thisSlice = uniMuon[it,:,:]
@@ -94,10 +96,10 @@ for varIdx in range(3):
     uniTitles = ['Unifold3', 'Unifold4', 'Unifold5']
 #    uniTitles = ['ReqProton', 'ReqProton','ReqProton']
 #    uniTitles = ['Multifold','Multifold','Multifold']
-    uniResult = np.load("%s/Omnifold_Binned%s_FDS%s_%s_SystStatDataSplit_NNAverage.npy" % (resultsDir, varSTV[varIdx],fakeIdx, uniTitles[varIdx]))
+    uniResult = np.load("%s/Omnifold_Binned%s_FDS%s_%s_SystStatDataSplit_NNAverage.npy" % (resultsDir, varSTV[varIdx], fakeIdx, uniTitles[varIdx]))
     uniChi2[varIdx+1].append(ibuChi2[varIdx+1][0])
-    uniMask = np.array([i for i in range(100) if i != 64 and i != 94])
-#    uniMask = np.array([i for i in range(100)])
+#    uniMask = np.array([i for i in range(100) if i != 64 and i != 94])
+    uniMask = np.array([i for i in range(100)])
     for it in range(omniResult.shape[0]):
         meanUnfold = np.mean(uniResult[it,uniMask,:], axis=0)
         cov = np.cov(uniResult[it,uniMask,:].T)
@@ -117,13 +119,16 @@ plt.legend(loc='upper right')
 plt.savefig("%s/Chi2FDS%d_IBU.png" % (plotDir, fakeIdx), dpi=200)
 
 plt.clf()
+linestyles = ['solid', 'dotted', 'dashed', 'dashdot']
 for idx in range(4):
-    plt.plot(omniChi2[idx], color=colors[idx], linestyle='solid', label="Omnifold " + labels[idx])
-    plt.plot(uniChi2[idx], color=colors[idx], linestyle='dotted', label="Unifold " + labels[idx])
-plt.title("Omnifold FDS %d $\chi^2$/dof Convergence" % fakeIdx)
+#    plt.plot(omniChi2[idx], color=colors[idx], linestyle='solid', label="Omnifold " + labels[idx])
+    plt.plot(omniChi2[idx], color=colors[idx], linestyle=linestyles[idx], label=labels[idx] + " Result")
+#    plt.plot(uniChi2[idx], color=colors[idx], linestyle='dotted', label="Unifold " + labels[idx])
+plt.title("OmniFold FDS %d $\chi^2$/dof Convergence" % fakeIdx)
 plt.ylabel("$\chi^2$/dof")
 plt.xlabel("Number of iterations")
-plt.legend(loc='upper right')
+plt.legend(loc='lower right')
+#plt.ylim(0,0.3)
 plt.savefig("%s/Chi2FDS%d_Omnifold.png" % (plotDir, fakeIdx), dpi=200)
 
 plt.clf()
@@ -143,7 +148,11 @@ print("dpT chi2 (Prior, IBU, Omnifold, Unifold): (%.1f, %.1f, %.1f, %.1f)" % (ib
 print("dalphaT chi2 (Prior, IBU, Omnifold, Unifold): (%.1f, %.1f, %.1f, %.1f)" % (ibuChi2[2][0]*19, ibuChi2[2][finalIt]*19, omniChi2[2][finalIt]*19, uniChi2[2][finalIt]*19))
 print("dphiT chi2 (Prior, IBU, Omnifold, Unifold): (%.1f, %.1f, %.1f, %.1f)" % (ibuChi2[3][0]*15, ibuChi2[3][finalIt]*15, omniChi2[3][finalIt]*15, uniChi2[3][finalIt]*15))
 
-        
+print("\multirow{4}{*}{FDS %d} & Muon (p, cos $\\theta$) & %.1f & %.1f & %.1f \\\\" % (fakeIdx, ibuChi2[0][finalIt]*58, uniChi2[0][finalIt]*58, omniChi2[0][finalIt]*58))
+print("& $\delta p_T$ & %.1f & %.1f & %.1f \\\\" % (ibuChi2[1][finalIt]*15,uniChi2[1][finalIt]*15, omniChi2[1][finalIt]*15))
+print("& $\delta \\alpha_T$ & %.1f & %.1f & %.1f \\\\" % (ibuChi2[2][finalIt]*15,uniChi2[2][finalIt]*15, omniChi2[2][finalIt]*15))
+print("& $\delta \phi_T$ & %.1f & %.1f & %.1f \\\\ \\hline" % (ibuChi2[3][finalIt]*15,uniChi2[3][finalIt]*15, omniChi2[3][finalIt]*15))
+      
 
     
 
