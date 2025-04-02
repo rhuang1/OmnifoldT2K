@@ -13,6 +13,9 @@ line_style = {
     'mc reco':'-',
     'mc reco reweighted': '-',
     'data':'dotted',
+    'mc truth prior':'-',
+    'mc truth pulled':'dotted',
+    'mc truth reweighted': '-'
 }
 
 
@@ -22,11 +25,15 @@ colors = {
     'mc gen':'#7570b3',
     'mc reco reweighted': '#7570b3',
     'mc reco':'#d95f02',
+    'mc truth prior':'#d95f02',
+    'mc truth pulled':'black',
+    'mc truth reweighted': '#7570b3'
+
 }
 
 #binning=np.linspace(-4,4,50)
 #binning=np.linspace(0,0.5,20)
-binning=np.linspace(-2,2,150)
+binning=np.linspace(-3,3,50)
             
 def FormatFig(xlabel,ylabel,ax0):
     #Limit number of digits in ticks
