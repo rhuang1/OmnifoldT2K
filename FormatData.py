@@ -5,10 +5,10 @@ from sklearn.preprocessing import StandardScaler
 
 
 outputDir = '../FormattedData/'
-recoFile = uproot.open("onoffaxis_reco_mc_v8.root")
-truthFile = uproot.open("onoffaxis_true_mc_v7.root")
-recoWeightsFile = uproot.open("onoffaxis_reco_mc_weights100_v8.root")
-truthWeightsFile = uproot.open("onoffaxis_true_mc_weights100_v7.1.root")
+recoFile = uproot.open("NuMuCC0pi_reco_v2.root")
+truthFile = uproot.open("NuMuCC0pi_true_v2.root")
+recoWeightsFile = uproot.open("NuMuCC0pi_reco_v2_weights.root")
+truthWeightsFile = uproot.open("NuMuCC0pi_true_v2_weights.root")
 
 reco = dict()
 for val in recoFile['selectedEvents'].keys():
