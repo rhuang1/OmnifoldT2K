@@ -74,7 +74,9 @@ class Multifold():
             new_weights=self.reweightAverage(self.mc_gen,self.model2)
             self.weights_push = new_weights
 
-            if self.verbose:            
+            if self.verbose:
+                np.save(os.path.join(self.weights_folder, 'Step1_Iter{}_{}_PullWeights.npy'.format(i, self.opt['NAME'])), self.weights_pull)
+                np.save(os.path.join(self.weights_folder, 'Step2_Iter{}_{}_PushWeights.npy'.format(i, self.opt['NAME'])), self.weights_push)
                 print("Plotting the results after iteration")
                 titles = ['log $p_{\mu}$ (Normalized)', 'cos $\\theta_{\mu}$', '$\phi_{\mu}$',
                           'log $p_{p}$ (Normalized)', 'cos $\\theta_p$', '$\phi_{p}$']
