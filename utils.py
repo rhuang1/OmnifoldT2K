@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import argparse
 import os
-import horovod.tensorflow.keras as hvd
 import tensorflow as tf
 
 
@@ -116,30 +115,19 @@ def Detector(sample,bias=0,std=0.5):
 
 
 def DataLoader(base_path,config,nevts=-1):
-    hvd.init()
     if nevts==-1:nevts=None
-    data = np.load(os.path.join(base_path,config['FILE_DATA_RECO']))[hvd.rank():nevts:hvd.size()]
-    data_mask = np.load(os.path.join(base_path,config['FILE_DATA_FLAG_RECO']))[hvd.rank():nevts:hvd.size()].astype("int")
+    data = np.load(os.path.join(base_path,config['FILE_DATA_RECO']))
+    data_mask = np.load(os.path.join(base_path,config['FILE_DATA_FLAG_RECO'])).astype("bool")
     #We only want data events passing a selection criteria
-    #data = np.expand_dims(data[data_mask],-1)
-    print(data)
-    #mc_reco = np.expand_dims(np.load(os.path.join(base_path,config['FILE_MC_RECO']))[hvd.rank():nevts:hvd.size()],-1)
+    data = data[data_mask,:]
 
-    #mc_gen = np.expand_dims(np.load(os.path.join(base_path,config['FILE_MC_GEN']))[hvd.rank():nevts:hvd.size()],-1)
-    mc_reco = np.load(os.path.join(base_path,config['FILE_MC_RECO']))[hvd.rank():nevts:hvd.size()]
-    mc_gen = np.load(os.path.join(base_path,config['FILE_MC_GEN']))[hvd.rank():nevts:hvd.size()]
+    mc_reco = np.load(os.path.join(base_path,config['FILE_MC_RECO']))
+    mc_gen = np.load(os.path.join(base_path,config['FILE_MC_GEN']))
 
-    print(mc_reco)
-    print(mc_gen)
-    reco_mask = np.load(os.path.join(base_path,config['FILE_MC_FLAG_RECO']))[hvd.rank():nevts:hvd.size()]==1
-    gen_mask = np.load(os.path.join(base_path,config['FILE_MC_FLAG_GEN']))[hvd.rank():nevts:hvd.size()]==1
-    # mc_reco[reco_mask==0]=-10
-    # mc_gen[gen_mask==0]=-10
-    print(data.shape)
-    print(mc_reco.shape)
-    print(mc_gen.shape)
+    reco_mask = np.load(os.path.join(base_path,config['FILE_MC_FLAG_RECO'])).astype("bool")
+    gen_mask = np.load(os.path.join(base_path,config['FILE_MC_FLAG_GEN'])).astype("bool")
 
-    data_weights = np.load(os.path.join(base_path,config['FILE_DATA_WEIGHT']))
+    data_weights = np.load(os.path.join(base_path,config['FILE_DATA_WEIGHT']))[data_mask]
     mc_weights_reco = np.load(os.path.join(base_path,config['FILE_MC_RECO_WEIGHT']))
     mc_weights = np.load(os.path.join(base_path,config['FILE_MC_GEN_WEIGHT']))
 
