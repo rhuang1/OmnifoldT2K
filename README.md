@@ -7,6 +7,7 @@ FormatData.py will read in the public data files and put them into numpy array f
 ./runOmnifold.sh will run the full procedure, using config_omnifold.json as a simple configuration. This script is also configured to generate diagnostic plots showing the reweighting result after each step 1 and step 2. It will also save the pull and push weights in numpy array format after each iteration. Applying the pull weights as reweighting factors on the reco-level simulated events should result in a distribution similar to the data. Applying the push weights as reweighting factors on the truth-level events provides the unfolded result. The relevant files are:
 
 config_omnifold.json:
+
 	FILES_MC_RECO: Reconstructed simulated events with shape (nEventsReco, nFeaturesReco)
 	FILES_MC_GEN: Truth simulated events with shape (nEventsTruth, nFeaturesTruth)
 	FILES_MC_FLAG_RECO: Flags for reco events passing selection. This can be all True if the selection was preapplied to the MC_RECO file.
